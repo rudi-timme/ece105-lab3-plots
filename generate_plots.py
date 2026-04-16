@@ -168,8 +168,9 @@ def main():
     """Generate sensor data, create plots, and save the resulting figure.
 
     This function generates synthetic sensor data using a fixed seed,
-    creates a 1x3 figure containing scatter, histogram, and box plots,
-    adjusts the layout for readability, and saves the figure to disk.
+    creates a 2×2 figure containing scatter, histogram, box plot, and a
+    summary statistics panel, adjusts the layout for readability, and
+    saves the figure to disk.
 
     Returns
     -------
@@ -180,10 +181,26 @@ def main():
     seed = 9658
     sensor_a, sensor_b, timestamps = generate_data(seed)
 
-    fig, axs = plt.subplots(1, 3, figsize=(18, 5))
-    plot_scatter(sensor_a, sensor_b, timestamps, axs[0])
-    plot_histogram(sensor_a, sensor_b, timestamps, axs[1])
-    plot_boxplot(sensor_a, sensor_b, timestamps, axs[2])
+    fig, axs = plt.subplots(2, 2, figsize=(16, 12))
+    plot_scatter(sensor_a, sensor_b, timestamps, axs[0, 0])
+    plot_histogram(sensor_a, sensor_b, timestamps, axs[0, 1])
+    plot_boxplot(sensor_a, sensor_b, timestamps, axs[1, 0])
+
+    summary_ax = axs[1, 1]
+    summary_ax.axis("off")
+    mean_a = np.mean(sensor_a)
+    mean_b = np.mean(sensor_b)
+    std_a = np.std(sensor_a, ddof=1)
+    std_b = np.std(sensor_b, ddof=1)
+    summary_text = (
+        f"Sensor A mean: {mean_a:.2f} °C\n"
+        f"Sensor A std dev: {std_a:.2f} °C\n\n"
+        f"Sensor B mean: {mean_b:.2f} °C\n"
+        f"Sensor B std dev: {std_b:.2f} °C\n\n"
+        f"Total readings: {sensor_a.size + sensor_b.size}\n"
+        f"Time span: {timestamps.min():.1f} to {timestamps.max():.1f} s"
+    )
+    summary_ax.text(0.01, 0.98, summary_text, va="top", ha="left", fontsize=12)
 
     fig.tight_layout()
     fig.savefig("sensor_analysis.png", dpi=150, bbox_inches="tight")
